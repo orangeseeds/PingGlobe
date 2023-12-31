@@ -4,8 +4,6 @@ import gsap from 'gsap'
 import * as lil from 'lil-gui'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import * as animation from './experience/animation'
-import * as light from './experience/lights'
 
 // sizes
 const sizes = {
@@ -85,7 +83,7 @@ const sizes = {
                 }
             })
     }
-    
+
     document.querySelector('button.simulate').addEventListener("click", () => {
         parameters.animate()
     })
@@ -199,7 +197,7 @@ const sizes = {
     // gui.add(parameters, 'zoom')
 
     // Object
-    const animatedRing = animation.createAnimatedRings()
+    const animatedRing = createAnimatedRings()
     animatedRing.scale.set(0.2, 0.2, 0.2)
     animatedRing.visible = false
     scene.add(animatedRing)
@@ -219,7 +217,7 @@ const sizes = {
     scene.add(helper);
 
     // Light
-    const lightGroup = light.createLightGroup()
+    const lightGroup = createLightGroup()
     scene.add(lightGroup)
 
     // Camera
@@ -248,7 +246,7 @@ const sizes = {
     const tick = () => {
         // Clock
         const elapsedTime = clock.getElapsedTime()
-        animation.animateRing(animatedRing, elapsedTime)
+        animateRing(animatedRing, elapsedTime)
 
         if (startUpdates) {
             controls.update()
@@ -271,4 +269,95 @@ const sizes = {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio))
     })
 
+}
+
+
+function createLightGroup() {
+    const lightGroup = new THREE.Group
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 6)
+
+    const pointLight1 = new THREE.PointLight(0xffffff, 2.8, 5, 1)
+    pointLight1.position.set(-3, -2, 2)
+
+    const pointLight3 = new THREE.PointLight(0xffffff, 1.5, 5, 1)
+    pointLight3.position.set(3, 1, -1)
+
+    const pointLight4 = new THREE.PointLight(0xffffff, 1.5, 5, 1)
+    pointLight4.position.set(2, -2, -1)
+
+    const pointLight2 = new THREE.PointLight(0xffffff, 2.9, 10)
+    pointLight2.position.set(0, 0, 4)
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
+    directionalLight.position.set(-10, 30, 50)
+
+    const directionalLight3 = new THREE.DirectionalLight(0xffffff, 1)
+    directionalLight3.position.set(0, 30, -30)
+
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1)
+    directionalLight2.position.set(-30, -30, -50)
+
+    const directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight)
+    directionalLightHelper.visible = false
+
+    const directionalLightHelper2 = new THREE.DirectionalLightHelper(directionalLight2)
+    directionalLightHelper2.visible = false
+    lightGroup.add(
+        ambientLight,
+        pointLight1,
+        pointLight2,
+        pointLight3,
+        pointLight4,
+        directionalLight,
+        directionalLight2,
+        directionalLight3,
+        directionalLightHelper,
+        directionalLightHelper2
+    )
+    return lightGroup
+}
+
+
+function createAnimatedRings() {
+    const animatedRing = new THREE.Group()
+    const ringl = new THREE.Mesh(
+        new THREE.TorusBufferGeometry(1, 0.05, 32, 32),
+        new THREE.MeshBasicMaterial({ color: 'white', transparent: true })
+    )
+    const ringm = new THREE.Mesh(
+        new THREE.TorusBufferGeometry(0.7, 0.05, 32, 32),
+        new THREE.MeshBasicMaterial({ color: 'white', transparent: true })
+    )
+    const rings = new THREE.Mesh(
+        new THREE.TorusBufferGeometry(0.4, 0.05, 32, 32),
+        new THREE.MeshBasicMaterial({ color: 'white', transparent: true })
+    )
+    ringl.rotation.x = Math.PI * 0.5
+    ringl.scale.z = 0.4
+    ringm.rotation.x = Math.PI * 0.5
+    ringm.scale.z = 0.4
+    rings.rotation.x = Math.PI * 0.5
+    rings.scale.z = 0.4
+    animatedRing.add(rings, ringm, ringl)
+
+    return animatedRing
+}
+
+function animateRing(group, elapsedTime) {
+    elapsedTime = elapsedTime * 1.5
+    group.children[0].position.y = Math.abs(Math.cos(elapsedTime))
+    group.children[0].material.opacity = 1 - group.children[0].position.y
+    group.children[0].scale.x = 1 - group.children[0].material.opacity
+    group.children[0].scale.y = 1 - group.children[0].material.opacity
+
+    group.children[1].position.y = Math.abs(Math.cos(elapsedTime)) + 0.2
+    group.children[1].material.opacity = 1 - group.children[1].position.y
+    group.children[1].scale.x = 1 - group.children[1].material.opacity
+    group.children[1].scale.y = 1 - group.children[1].material.opacity
+
+    group.children[2].position.y = Math.abs(Math.cos(elapsedTime)) + 0.4
+    group.children[2].material.opacity = 1 - group.children[2].position.y
+    group.children[2].scale.x = 1 - group.children[2].material.opacity
+    group.children[2].scale.y = 1 - group.children[2].material.opacity
 }
